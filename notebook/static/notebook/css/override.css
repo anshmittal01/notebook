@@ -5,3 +5,23 @@ a hack to deal with our current css styles and no new styling should be added in
 #ipython-main-app {
     position: relative;
 }
+
+.shortcut{
+	float: right;
+	padding-top: 2px;
+    color: #808080;
+    font-size: 12px;
+}
+
+.commandModeShortcut{
+	float: right;
+	padding-top: 2px;
+    color: #707070;
+    font-weight: 700;
+    font-size: 12px;
+}
+
+
+.dropdown-menu{
+	min-width: 283px;
+}
