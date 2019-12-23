@@ -51,7 +51,6 @@ class RecentList(APIHandler):
             return
         temp = []
         for i in range(len(recentlist)):
-            print(type(recentlist[i]))
             if os.path.isfile(recentlist[i]['Path']):
                 temp.append(recentlist[i])
         recentlist = temp
@@ -64,7 +63,6 @@ class RecentList(APIHandler):
     def delete(self,recentlist_id):
         # Deletes the recent list with given recentlist_id
         dire = ".recentList.json"
-        # recentlist_id = int(recentlist_id)
         recentlist = json.loads(open(dire, 'r').read())
         temp = []
         for i in range(len(recentlist)):

@@ -4,13 +4,14 @@
 define([
     'jquery',
     'base/js/utils',
+    'moment', 
     'bidi/bidi',
-], function($, utils, bidi) {
+], function($, utils, moment, bidi) {
     "use strict";
 
     var isRTL = bidi.isMirroringEnabled();
     var RecentList = function () {
-        
+        this.base_url = utils.get_body_data("baseUrl");
     };
     
    RecentList.prototype.load_files=  function (){
@@ -23,42 +24,87 @@ define([
             success : $.proxy(that.addFiles, this),
             error : utils.log_ajax_error,
         };
-        var url = utils.url_path_join('/', 'api/recentlist');
+        var url = utils.url_path_join(this.base_url, 'api/recentlist');
         utils.ajax(url, settings);
     };
 
-RecentList.prototype.addFiles=function (data){
-
+  RecentList.prototype.addFiles=function (data){
+          var that = this;
           document.getElementById("recent_list").innerHTML = "";
           if (data['Error']) {
                 document.getElementById("recent_list").innerHTML = '<div class = "row list_placeholder">There are no recent notebooks.</div>';          
-
+ 
           }       
           else 
           {
-                var count = 0;
                 data.forEach(function(x) {
                 var time = utils.format_datetime(x.Time);
                 var path = x.Path;
-                var y = document.getElementById("recent_list").innerHTML;
-                document.getElementById("recent_list").innerHTML =
-                  y +
-                  '<div class="list_item row"><div class="col-md-12"><i class="item_icon notebook_icon icon-fixed-width"></i><a class="item_link" href="/notebooks/' +
-                  path +
-                  '" target="_blank"><span class="item_name">' +
-                  path +
-                  '</span></a> <div class="pull-right"><div class="item_buttons pull-right"><button class="btn btn-warning btn-xs" id="remove-nb">Remove</button></div><div class="pull-left"><span class="item_modified pull-left" title="' +
-                  time +
-                  '">' +
-                  time +
-                  '</span><span class="file_size pull-right">&nbsp;</span></div></div></div></div>';
-                count = count +1;
+                var item = that.new_item(time,path,moment(x.Time).format("YYYY-MM-DD HH:mm"));
+                $('#recent_list').append(item);
           });
         }
         
     };
 
-     RecentList.prototype.deleteRecentList = function(del_id) {
+  RecentList.prototype.new_item = function(time,path,title_time) {
+      var row = $('<div/>')
+          .addClass("list_item")
+          .addClass("row");
+
+      var item = $("<div/>")
+          .addClass("col-md-12")
+          .appendTo(row);
+
+      $('<i/>')
+          .addClass('item_icon')
+          .addClass('notebook_icon')
+          .addClass('icon-fixed-width')
+          .appendTo(item);
+
+      var link = $("<a/>")
+          .addClass("item_link")
+          .attr("href",path)
+          .attr("target","_blank")
+          .appendTo(item);
+
+      $("<span/>")
+          .addClass("item_name")
+          .text(path)
+          .appendTo(link);
+
+      var div = $('<div/>')
+          .addClass('pull-right')
+          .appendTo(item);
+
+      var buttons = $('<div/>')
+          .addClass("item_buttons pull-right")
+          .appendTo(div);
+      $("<button/>")
+          .attr('id','remove-nb')
+          .addClass("btn btn-warning btn-xs")
+          .text('Remove')
+          .appendTo(buttons);
+      var div2 = $('<div/>')
+          .addClass('pull-left')
+          .appendTo(div);
+
+      $("<span/>")
+          .addClass("item_modified")
+          .addClass("pull-left")
+          .attr('title',title_time)
+          .text(time)
+          .appendTo(div2);
+
+      $("<span/>")
+          .addClass("file_size")
+          .addClass("pull-right")
+          .appendTo(div2);
+
+      return row;
+  };
+
+  RecentList.prototype.deleteRecentList = function(del_id) {
           var that = this;
           var settings = {
               processData : false,
@@ -72,7 +118,8 @@ RecentList.prototype.addFiles=function (data){
           };
 
           var url = utils.url_path_join(
-              '/api/recentlist/',
+              this.base_url,
+              'api/recentlist/',
               del_id
           );
           utils.ajax(url, settings);
