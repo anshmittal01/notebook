@@ -20,6 +20,7 @@ from ..utils import (
 )
 
 from ..transutils import _
+from tornado.ioloop import IOLoop
 
 def get_frontend_exporters():
     from nbconvert.exporters.base import get_export_names, get_exporter
@@ -70,35 +71,6 @@ def get_frontend_exporters():
         frontend_exporters.remove(template_exporter)
     return sorted(frontend_exporters)
 
-def savingFile(name,path):
-    ''' Get the name,time and path of a notebook file that is opened and save the
-    information in the current working directly'''
-
-    dire = ".recentList.json"
-    try:
-        recentlist = json.loads(open(dire, 'r').read())
-    except:
-        recentlist = []
-
-    if len(recentlist)<1:
-        recentlist = []
-
-    present = False
-    for i in range(len(recentlist)):
-        if recentlist[i]['Path']==path:
-            temp = recentlist[i]
-            temp['Time'] = datetime.now().isoformat()
-            recentlist.remove(recentlist[i])
-            recentlist.insert(0, temp)
-            present = True
-            break
-
-    if not present:
-        if len(recentlist)>=10 and i==9:
-            recentlist.remove(recentlist[9])
-        recentlist.insert(0, {'Path':path, 'Time':datetime.now().isoformat()})
-    with open(dire, 'w') as fout:
-        json.dump(recentlist, fout)
         
 class NotebookHandler(IPythonHandler):
 
@@ -123,7 +95,8 @@ class NotebookHandler(IPythonHandler):
             return FilesRedirectHandler.redirect_to_files(self, path)
         name = path.rsplit('/', 1)[-1]
         
-        savingFile(name,path)
+        IOLoop.current().add_callback(add_recent_notebook, (name,path))
+
         self.write(self.render_template('notebook.html',
             notebook_path=path,
             notebook_name=name,

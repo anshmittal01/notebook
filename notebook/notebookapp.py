@@ -308,6 +308,7 @@ class NotebookWebApplication(web.Application):
         handlers.extend(load_handlers('notebook.services.config.handlers'))
         handlers.extend(load_handlers('notebook.services.contents.handlers'))
         handlers.extend(load_handlers('notebook.services.sessions.handlers'))
+        handlers.extend(load_handlers('notebook.services.recent.handlers'))
         handlers.extend(load_handlers('notebook.services.nbconvert.handlers'))
         handlers.extend(load_handlers('notebook.services.security.handlers'))
         handlers.extend(load_handlers('notebook.services.shutdown'))
